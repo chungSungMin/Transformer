@@ -1,17 +1,8 @@
 # Attention Is All You Need
 
+> RNN과 CNN 계열의 모델에서 병렬처리의 어려움, Sequence가 긴 데이터에 대한 장거리 의존성 부족 및 기하급수적으로 증가하는 연산량을 해결하기 위해서 등장하였습니다.
 > 해당 논문에서는 최초로 Self Attention 구조만을 사용하여 기계번역을 구현하였습니다. RNN 구조를 갖고 있지 않기 때문에 거리가 먼 x에 대해서도 모두 동일한 연산량으로 계산할 수 있어 계산의 효율성을 높히면서도 높은 성능을 보여주었습니다.
 
-## Transformer의 구조
-![alt text](image.png)
-
-## Transformer 구조 설명
-
-Transformer는 크게 Encoder Decoder 구조로 구성되어있습니다. 
-
-> Encoder
-
-![alt text](image-7.png)
 
 #### [ Input Data ]
 Encoder에서는 우선 데이터를 Embedding하게 됩니다.
@@ -24,20 +15,34 @@ Encoder에서는 우선 데이터를 Embedding하게 됩니다.
 Token = [[1, 0, 0], [0, 1, 0], [0, 0, 1]] 이런식으로 Embedding이 되게 됩니다.
 해당 논문에서는 D_model = 512로 임베딩하였다고 합니다.
 
-그렇다면 Token의 수가 N 개이고 D_model = 512 로 입력 데이터를 임베딩 하는경우 N * 512 크기의 Matrix를 얻게 됩니다. 이것이 바로 Transformer의 Input 데이터가 됩니다.
+그렇다면 Token의 수가 N 개이고 D_model = 512 로 입력 데이터를 임베딩 하는경우 N * 512 크기의 Matrix를 얻게 됩니다. 이것이 Input 데이터가 됩니다.
+
+조금만 더 자세히 알아보도록 하겠습니다.
+사실 Transformer에서는 단어 단위로 토큰을 생성하지 않았습니다. BPE 라는 알고리즘을 활용해서 알파벳 단위로 토큰을 설정하게 됩니다.
+예를들어 "I am Happy" 라는 문장이 들어오게 되면 ['i', 'a', 'm', 'h', 'a', 'p', 'p', 'y' ] 로 분할하게 됩니다. 그리고 나서 반복적으로 각 문장에 동시에 등장하는 알파벳 끼리 묶어주게 됩니다.
+<img width="230" alt="image" src="https://github.com/user-attachments/assets/d7913348-2580-4463-bd3e-24091e88095e">
+<br><br>
+위의 사진과 같이 각 알파벳 별 동시에 등장하는 횟수를 파악하고 가장 많이 등장하는 쌍을 하나로 묶어주게 됩니다. 이를 통해서 원하는 K번 만큼 반복하게 되고 이떄 묶여진 것이 토큰이 되게 됩니다.
+즉, Transformer에서는 토큰을 생성하는 방식을 BPE 방식을 사용해서 토큰을 생성하였습니다.
+그리고 Sentence가 N개를 동시에 처리할때 문장 마다 포함하고 있는 토큰의 수가 다르게 됩니다. 이때 행렬로 input을 넣어야 하기 떄문에 길이를 맞춰야하는데 이때 길이를 맞출수 있는 방법은 간단하게 2가지가 존재할수 있습니다.
+1. 특정 길이를 설정해서 해당 길이로 긴것은 자르고 짧은 것은 padding을 한다.
+2. 가장 많은 토큰 수를 기준으로 부족한 것을 padding으로 채우는 방법이 존재할 수 있습니다.
+<br>
+이렇게 해서 최종적으로 Transformer에서는 ( 배치 사이즈 X 토큰의 갯수 X 모델의 차원 ) 의 행렬이 들어가게 됩니다.
+
 
 하지만 Sequence 데이터에서 " 내가 너를 때린다 " VS "너가 나를 떄린다 " 처럼 각 단어의 순서가 중요한 경우가 존재합니다. 그렇기에 각 데이터의 순서에 대한 정보를 입력해줄 필요가 있습니다.
+그래서 해당 논문에서는 Positional Encoding값을 더해줌으로써 각 Token의 위치 정보를 추가해주게 됩니다. 이때 Positional Encoding 값 또한 ( 배치사이즈 X N X 512 ) 크기가 됩니다. 
 
-그래서 해당 논문에서는 Positional Encoding값을 더해줌으로써 각 Token의 위치 정보를 추가해주게 됩니다. 이때 Positional Encoding 값 또한 N * 512 크기가 됩니다. 
-
+positional encoding의 경우에는 상대적 절대적 위치를 판단할수 있는 특정 값을 더하게 됩니다. 이때 단순히 행렬을 더하기 함으로써 구현 되는데 이를 통해서 자연스럽게 Matrix에 위치 정보가 들어가게 됩니다. 하지만 너무나도 큰 위치 정보 값을 더하게 된다면 실제 임베딩 값의 의미가 무효화 되기 때문이 -1 과 1 사이의 값을 갖는 sin과 cos를 활용해서 구현되어있습니다. 이렇게 만들어진 행렬에서 Q, K, V를 만들어 이를 Attention 하게 된다면 자연스럽게 위치 정보가 들어가 있게 됩니다. 그래서 의미와 위치 정보를 통한 Attention이 이뤄지게 됩니다.
+<br>
+![image](https://github.com/user-attachments/assets/c0827da7-befb-4316-8379-82017a812ce8)
 ![alt text](image-1.png)
-
-결국 Token Embedding = T, Positional Encoding = P 라고 하였을때 둘다 N * 512 크기를 갖게 되므로 단순히 T + P 계산을 통해서 하나의 Matrix를 만들게 됩니다.
 
 
 
 #### [ Attention ]
-위에서 만든 N * 512 크기의 행렬을 Input이 Encoder의 Attention Module에 들어가게 됩니다.
+위에서 만든 ( 배치 X N X 512 )  크기의 행렬을 Input이 Encoder의 Attention Module에 들어가게 됩니다.
 
 Attention 구조에서는 데이터를 Q, K, V 행렬로 분할하여 계산하게 됩니다.
 ![alt text](image-2.png)
