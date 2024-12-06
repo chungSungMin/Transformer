@@ -15,12 +15,12 @@ class FeedForward(nn.Module):
         self.layer_norm = nn.LayerNorm(in_channels)
 
     def forward(self, x) :
-        ffn = x
+        residual = x
         out = self.fc_out1(x)
         out = self.relu(out)
         out = self.fc_out2(out)
 
-        out = out + ffn
+        out = out + residual
         out = self.layer_norm(out)
 
         return out
@@ -42,6 +42,7 @@ class MultiheadAttention(nn.Module):
         self.layer_norm = nn.LayerNorm(in_channels)
 
     def forward(self, x):
+        residual = x
         B, S, D = x.size()
 
         Q = self.WQ(x)
@@ -56,7 +57,7 @@ class MultiheadAttention(nn.Module):
         attention_value = torch.matmul(F.softmax(attention_score, dim = -1), V)
 
         out = attention_value.transpose(1,2).contiguous().view(B,S,D)
-        out = out + x
+        out = out + residual
         out = self.layer_norm(out)
         return out
     
