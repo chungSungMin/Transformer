@@ -74,6 +74,19 @@ class Encoder(nn.Module):
         return ffn_output
 
 
+class StackedEncoder(nn.Module):
+    def __init__(self, in_channels, num_head, ffn_expand, num_layers=8):
+        super().__init__()
+        self.layers = nn.ModuleList([
+            Encoder(in_channels, num_head, ffn_expand) for _ in range(num_layers)
+        ])
+
+    def forward(self, x):
+        for layer in self.layers:
+            x = layer(x)
+        return x
+
+
 if __name__ == '__main__':
     batch_size = 32
     seq_len = 8
@@ -81,7 +94,7 @@ if __name__ == '__main__':
     num_heads = 8
     ffn_expand = 2048
     
-    encoder = Encoder(in_channels, num_heads, ffn_expand)
+    model = StackedEncoder(in_channels, num_heads, ffn_expand, num_layers=8)
     x = torch.randn(batch_size, seq_len, in_channels)
-    output = encoder(x)
-    print(output.shape)  # 출력: (32, 8, 512)
+    output = model(x)
+    print(output.shape)  # (32, 8, 512)

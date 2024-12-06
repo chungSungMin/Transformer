@@ -9,7 +9,12 @@ Num_head : 8<br>
 
 즉 입력 데이터의 형태는 ( 32, 8, 512) 를 갖게 됩니다.
 
-<br><br>
+<br>
+
+> FeedForward Class 설명
+
+in_channels와 ffn_expand를 입력으로 받아 512차원을 2048로 확장하여 다양한 패턴을 학습 할수 있게 한후 ReLU()함수를 통해 비선형성을 추가합니다. 
+그런 다음 다시 Linear()를 통해서 2048차원을 512차원으로 만들어줍니다. 이렇게 FFN층을 나온다음 Residual과 단순 더하기를 한 다음 LayerNorm()을 적용한후 결과를 반환합니다.
 
 
 > MultiHead Attention Class 설명
@@ -48,9 +53,10 @@ self.fc_out : attention value를 구한 후 수행되는 FFN 층 <br>
 
 이렇게 얻어진 Attention Value의 경우 ( Batch size, Num_head, Sequence, d_model )의 크기를 갖게 되고 Encoder의 경우 Input과 output의 크기가 동일하게 나와야 하기에 이를 복원시키기 위해서 다시 Num_head와 sequence의 자리를 변경한 후에 이를 ( Batch_size, Sequence, Dimention )의 크기로 변경해주게 됩니다.
 
-그리고 FFN층을 통과하게 되면서 최종적인 결과를 얻을 수 있게 됩니다.
-
-이렇게 해서 최종적으로 MultiHead Attention을 활용하여 하나의 Encoder Block을 통과하게 된것 입니다.
+그리고 입력값인 Residual과 단순 summation을 통해 skip connection을 하고, LayerNorm()을 한후 결과를 Return 해줍니다.
 
 
+> StackedEncoder class 설명
 
+nn.ModuleListe()함수를 통해서 Encoder 클래스를 우리가 원하는 만큼 반복하도록 한 리스트 자체를 self.StackedEncoder로 설정하게 됩니다.<br>
+이후 forward()에서 반복문을 통해서 우리가 원하는 만큼 입력값이 Encoder를 통과하도록 합니다.
