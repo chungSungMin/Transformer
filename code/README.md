@@ -19,6 +19,7 @@ in_channels와 ffn_expand를 입력으로 받아 512차원을 2048로 확장하�
 
 > MultiHead Attention Class 설명
 
+< **init 함수 설명** > <br>
 각 매계변수들을 self.을 활용하여 선언합니다.<br>
 그리고 각 가중치 행렬들을 서언해줍니다.<br><br>
 
@@ -32,7 +33,7 @@ self.fc_out : attention value를 구한 후 수행되는 FFN 층 <br>
 <br>
 
 
-> MultiHead Attention Forward 설명
+< **MultiHead Attention Forward 설명** >
 
 입력값의 Batch_size, Sequence, Dimention을 unpacking 합니다. <br>
 
