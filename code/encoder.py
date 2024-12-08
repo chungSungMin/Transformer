@@ -15,6 +15,9 @@ class FeedForward(nn.Module):
         self.layer_norm = nn.LayerNorm(in_channels)
 
     def forward(self, x) :
+        print(f'\t\t[ FFN ]')
+
+
         residual = x
         out = self.fc_out1(x)
         out = self.relu(out)
@@ -42,6 +45,8 @@ class MultiheadAttention(nn.Module):
         self.layer_norm = nn.LayerNorm(in_channels)
 
     def forward(self, x):
+        print(f'\t\t[ MultiHead Attention ]')
+
         residual = x
         B, S, D = x.size()
 
@@ -69,6 +74,8 @@ class Encoder(nn.Module):
         self.ffn = FeedForward(in_channels, ffn_expand)
 
     def forward(self,x):
+        print(f'\t[ Encoder ]')
+
         attn_output = self.multihead_atten(x)
         ffn_output = self.ffn(attn_output)
         return ffn_output
@@ -77,24 +84,12 @@ class Encoder(nn.Module):
 class StackedEncoder(nn.Module):
     def __init__(self, in_channels, num_head, ffn_expand, num_layers=8):
         super().__init__()
-        self.layers = nn.ModuleList([
+        self.encoder = nn.ModuleList([
             Encoder(in_channels, num_head, ffn_expand) for _ in range(num_layers)
         ])
 
     def forward(self, x):
-        for layer in self.layers:
+        print(f'=====[ Encoder ]=====')
+        for layer in self.encoder:
             x = layer(x)
         return x
-
-
-if __name__ == '__main__':
-    batch_size = 32
-    seq_len = 8
-    in_channels = 512
-    num_heads = 8
-    ffn_expand = 2048
-    
-    model = StackedEncoder(in_channels, num_heads, ffn_expand, num_layers=8)
-    x = torch.randn(batch_size, seq_len, in_channels)
-    output = model(x)
-    print(output.shape)  # (32, 8, 512)
