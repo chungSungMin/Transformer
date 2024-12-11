@@ -140,3 +140,10 @@ Input data -> Masked Multihead Attention -> Add & Norm을 거치게 됩니다.
 이때 Input으로 Q, K, V를 입력하게 되는데, K, V 의 경우 Encoder의 최종 output의 K, V 를 input으로 받게 됩니다. 그리고 Q의 경우 Decoder의 이전 Layer의 output을 받아오게 됩니다.
 
 Query는 디코더의 현재 예측에 필요한 정보를 담고 있습니다. 이렇게 함으로써 Query가 디코더의 현재 상태를 반영하고, Key와 Value가 소스 시퀀스의 정보를 반영하도록 분리함으로써, 디코더는 현재 예측에 필요한 소스 시퀀스의 관련 정보를 효과적으로 검색할 수 있게 됩니다.
+
+
+# ViT 추가 내용
+ViT는 Transformer의 입력으로 이미지를 사용한 모델입니다. 해당 논문에서는 단순히 입력값을 패치로 나누어 embedding하고 CLS 토큰을 추가하는것 이외에는 Transformer의 Encdoer와 동일한 구조를 갖습니다.
+그렇다면 왜 ViT가 잘 작동할까요?????
+
+지금까지 CNN이 잘 작동했던 이유는 1. Spatial Locality 2.Positional Invaraince 입니다. 즉, 주변 픽셀을 보고 판단하라고 사전에 조건을 걸어두어 더 적은 연산량을 갖게 되고, 객체가 이미지내 어디에 존재하든 인식할수 있어서 FCN 보다 빠르게 수렴하고 높은 정확도를 낼수 있었습니다. 하지만 ViT의 경우 이러한 가정이 없이 단순히 data와 연산량을 통해서 model이 스스로 어디가 중요한지를 학습하게 되면서 CNN에서는 인식할 수 없었던 예외적인 상황또한 고려할 수 있게 되어 보다 높은 성능을 낼수 있게 되었습니다. 즉 Inductive Bias (귀납적 편향 : 인간이 정해둔 가정? ) 를 최대한 줄이면서 모델이 더 많은 정보를 학습할수 있도록 유도하였습니다.
