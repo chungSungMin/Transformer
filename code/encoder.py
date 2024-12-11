@@ -93,14 +93,14 @@ class MultiheadAttention(nn.Module):
         K = self.WK(x)
         V = self.WV(x)
 
-        Q = Q.view(B, S, self.num_head, self.d_model).transpose(1, 2)  # (B, num_head, S, d_model)
-        K = K.view(B, S, self.num_head, self.d_model).transpose(1, 2)  # (B, num_head, S, d_model)
-        V = V.view(B, S, self.num_head, self.d_model).transpose(1, 2)  # (B, num_head, S, d_model)
+        Q = Q.view(B, S, self.num_head, self.d_model).transpose(1, 2) 
+        K = K.view(B, S, self.num_head, self.d_model).transpose(1, 2)  
+        V = V.view(B, S, self.num_head, self.d_model).transpose(1, 2) 
 
         attention_score = torch.matmul(Q, K.transpose(-1, -2)) / np.sqrt(self.d_model)
         attention_value = torch.matmul(F.softmax(attention_score, dim=-1), V)
 
-        out = attention_value.transpose(1, 2).contiguous().view(B, S, D)  # (B, S, D)
+        out = attention_value.transpose(1, 2).contiguous().view(B, S, D) 
 
         out = self.WO(out)
 
