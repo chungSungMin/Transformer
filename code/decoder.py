@@ -43,6 +43,8 @@ class EncoderDecoderAttention(nn.Module):
         self.WK = nn.Linear(self.in_channels, self.in_channels)
         self.WV = nn.Linear(self.in_channels, self.in_channels)
 
+        self.WO = nn.Linear(self.in_channels, self.in_channels)
+
         self.layer_norm = nn.LayerNorm(self.in_channels)
 
     def forward(self, encoder_output, decoder_input) :
@@ -65,6 +67,8 @@ class EncoderDecoderAttention(nn.Module):
         attention_value = torch.matmul(attention_score, V)
 
         attention_result = attention_value.transpose(1,2).contiguous().view(B,S,D)
+
+        result = self.WO(attention_result)
         
         result = attention_result + residual
         result = self.layer_norm(result)
@@ -85,8 +89,9 @@ class MaskedMultiHeadAttention(nn.Module):
         self.WK = nn.Linear(self.in_channels, self.in_channels)
         self.WV = nn.Linear(self.in_channels, self.in_channels)
 
-        self.layer_norm = nn.LayerNorm(self.in_channels)
         self.WO = nn.Linear(self.in_channels, self.in_channels)
+
+        self.layer_norm = nn.LayerNorm(self.in_channels)
 
     def forward(self, x):
         print(f'\t\t[ Masked MultiHead Attention ]')

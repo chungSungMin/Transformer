@@ -42,6 +42,8 @@ class MultiheadAttention(nn.Module):
         self.WK = nn.Linear(self.in_channels, self.in_channels)
         self.WV = nn.Linear(self.in_channels, self.in_channels)
 
+        self.WO = nn.Linear(self.in_channels, self.in_channels)
+
         self.layer_norm = nn.LayerNorm(in_channels)
 
     def forward(self, x):
@@ -62,6 +64,9 @@ class MultiheadAttention(nn.Module):
         attention_value = torch.matmul(F.softmax(attention_score, dim = -1), V)
 
         out = attention_value.transpose(1,2).contiguous().view(B,S,D)
+
+        out = self.WO(out)
+
         out = out + residual
         out = self.layer_norm(out)
         return out
