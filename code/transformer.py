@@ -4,8 +4,7 @@ from encoder import StackedEncoder
 from decoder import StackedDecoder
 
 class Transformer(nn.Module):
-    """Transformer 모델.
-
+    """Transformer 
     이 클래스는 Transformer 아키텍처를 구현하며, Encoder와 Decoder를 초기화하고 호출하여 결과를 도출합니다.
     """
     def __init__(self, in_channels, num_heads, ffn_expand, num_layers):
