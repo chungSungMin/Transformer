@@ -86,6 +86,7 @@ class MaskedMultiHeadAttention(nn.Module):
         self.WV = nn.Linear(self.in_channels, self.in_channels)
 
         self.layer_norm = nn.LayerNorm(self.in_channels)
+        self.WO = nn.Linear(self.in_channels, self.in_channels)
 
     def forward(self, x):
         print(f'\t\t[ Masked MultiHead Attention ]')
@@ -110,6 +111,8 @@ class MaskedMultiHeadAttention(nn.Module):
         attention_value = torch.matmul(masked_attention_score, V)
 
         attention_result = attention_value.transpose(1,2).contiguous().view(B,S,D)
+        attention_result = self.WO(attention_result)
+        
         result = attention_result + residual
         result = self.layer_norm(result)
         return result
